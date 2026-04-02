@@ -1,22 +1,1514 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Your Name Portfolio</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Name — IT Portfolio</title>
+
+  <!-- ── FONTS ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet" />
+
+  <!-- ── CHART.JS ── -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ============================================================
+       CSS CUSTOM PROPERTIES — edit these to retheme instantly
+    ============================================================ */
+    :root {
+      --bg:        #09090f;
+      --bg2:       #0e0e1a;
+      --bg3:       #13131f;
+      --surface:   #181828;
+      --border:    rgba(0,225,255,0.12);
+      --cyan:      #00e1ff;
+      --cyan-dim:  rgba(0,225,255,0.15);
+      --cyan-glow: rgba(0,225,255,0.35);
+      --white:     #f0f4ff;
+      --muted:     #7e84a3;
+      --danger:    #ff4d6d;
+      --font-disp: 'Bebas Neue', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --font-body: 'DM Sans', sans-serif;
+      --radius:    8px;
+      --nav-h:     64px;
+      --trans:     0.35s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* subtle scanline texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.06) 2px,
+        rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    ul { list-style: none; }
+
+    .container {
+      width: min(1200px, 92vw);
+      margin-inline: auto;
+    }
+
+    /* ============================================================
+       TYPOGRAPHY HELPERS
+    ============================================================ */
+    .label {
+      font-family: var(--font-mono);
+      font-size: .72rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    .section-title {
+      font-family: var(--font-disp);
+      font-size: clamp(3rem, 8vw, 6rem);
+      line-height: 1;
+      letter-spacing: .02em;
+      color: var(--white);
+    }
+
+    .section-title span { color: var(--cyan); }
+
+    /* ============================================================
+       SCROLL REVEAL — add .reveal to elements, JS handles rest
+    ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ============================================================
+       BUTTONS
+    ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .75rem 1.75rem;
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: .82rem;
+      letter-spacing: .08em;
+      cursor: pointer;
+      transition: var(--trans);
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--cyan);
+      color: var(--bg);
+      font-weight: 500;
+      box-shadow: 0 0 24px var(--cyan-glow);
+    }
+    .btn-primary:hover {
+      background: #fff;
+      box-shadow: 0 0 40px var(--cyan-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: var(--cyan-dim);
+      transform: translateY(-2px);
+    }
+
+    /* ============================================================
+       NAV
+    ============================================================ */
+    #navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      z-index: 1000;
+      background: rgba(9,9,15,.82);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-inner {
+      width: min(1200px, 92vw);
+      margin-inline: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-family: var(--font-disp);
+      font-size: 1.5rem;
+      letter-spacing: .06em;
+      color: var(--cyan);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: .78rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color var(--trans);
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -4px;
+      width: 0; height: 1px;
+      background: var(--cyan);
+      transition: width var(--trans);
+    }
+    .nav-links a:hover { color: var(--cyan); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* hamburger */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 24px; height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: var(--trans);
+    }
+
+    /* mobile nav */
+    @media (max-width: 720px) {
+      .nav-links {
+        position: fixed;
+        top: var(--nav-h); left: 0; right: 0;
+        flex-direction: column;
+        background: var(--bg2);
+        border-bottom: 1px solid var(--border);
+        padding: 1.5rem;
+        gap: 1.2rem;
+        transform: translateY(-110%);
+        transition: transform var(--trans);
+        pointer-events: none;
+      }
+      .nav-links.open {
+        transform: none;
+        pointer-events: all;
+      }
+      .nav-toggle { display: flex; }
+    }
+
+    /* ============================================================
+       HERO / HOME
+    ============================================================ */
+    #home {
+      min-height: 100svh;
+      padding-top: var(--nav-h);
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* animated grid background */
+    #home::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,225,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,225,255,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 30%, transparent 100%);
+    }
+
+    /* cyan glow blob */
+    #home::after {
+      content: '';
+      position: absolute;
+      top: -20%; right: -10%;
+      width: 70vw; height: 70vw;
+      max-width: 900px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,225,255,.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 4rem;
+      padding-block: 7rem 5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .35rem .9rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+      background: var(--cyan-dim);
+    }
+    .hero-tag .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(.75); }
+    }
+
+    .hero-name {
+      font-family: var(--font-disp);
+      font-size: clamp(4rem, 12vw, 9rem);
+      line-height: .95;
+      letter-spacing: .02em;
+    }
+    .hero-name .line2 { color: var(--cyan); }
+
+    .hero-sub {
+      font-family: var(--font-mono);
+      font-size: clamp(.8rem, 2vw, 1rem);
+      color: var(--muted);
+      letter-spacing: .1em;
+      margin: 1.2rem 0 .8rem;
+    }
+
+    .hero-tagline {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--white);
+      font-weight: 300;
+      max-width: 520px;
+      margin-bottom: 2.5rem;
+      opacity: .85;
+    }
+
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    /* decorative vertical card on the right */
+    .hero-card {
+      width: 220px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--surface), var(--bg2));
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: var(--cyan-dim);
+      filter: blur(30px);
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat .num {
+      font-family: var(--font-disp);
+      font-size: 2.8rem;
+      line-height: 1;
+      color: var(--cyan);
+    }
+    .hero-stat .desc {
+      font-family: var(--font-mono);
+      font-size: .68rem;
+      letter-spacing: .12em;
+      color: var(--muted);
+      margin-top: .25rem;
+      text-transform: uppercase;
+    }
+    .hero-divider {
+      height: 1px;
+      background: var(--border);
+    }
+
+    @media (max-width: 860px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-card { display: none; }
+    }
+
+    /* ============================================================
+       ABOUT
+    ============================================================ */
+    #about {
+      padding: 7rem 0;
+      background: var(--bg2);
+      position: relative;
+    }
+    #about::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+      margin-top: 3rem;
+    }
+
+    .about-img-wrap {
+      position: relative;
+    }
+    .about-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .about-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      /* Replace src with your photo */
+    }
+    .about-img-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: .75rem;
+    }
+    .about-img-placeholder svg { opacity: .4; }
+
+    /* floating accent box */
+    .about-badge {
+      position: absolute;
+      bottom: -1.5rem; right: -1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .badge-icon {
+      width: 42px; height: 42px;
+      border-radius: 8px;
+      background: var(--cyan-dim);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--cyan);
+      font-size: 1.3rem;
+    }
+    .badge-text .t1 {
+      font-family: var(--font-disp);
+      font-size: 1.4rem;
+      line-height: 1;
+      color: var(--cyan);
+    }
+    .badge-text .t2 {
+      font-family: var(--font-mono);
+      font-size: .65rem;
+      color: var(--muted);
+      letter-spacing: .1em;
+    }
+
+    .about-content {}
+    .about-content p {
+      color: rgba(240,244,255,.75);
+      margin-bottom: 1.1rem;
+      font-size: .97rem;
+    }
+
+    .skill-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      margin-top: 1.8rem;
+    }
+    .chip {
+      padding: .38rem .9rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-family: var(--font-mono);
+      font-size: .72rem;
+      letter-spacing: .08em;
+      color: var(--muted);
+      background: var(--surface);
+      transition: var(--trans);
+    }
+    .chip:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: var(--cyan-dim);
+    }
+
+    @media (max-width: 860px) {
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .about-img { aspect-ratio: 4/3; }
+      .about-badge { right: .5rem; }
+    }
+
+    /* ============================================================
+       SECTION WRAPPER helper
+    ============================================================ */
+    .section-header {
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ============================================================
+       PROJECTS
+    ============================================================ */
+    #projects {
+      padding: 7rem 0;
+      background: var(--bg);
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3.5rem;
+    }
+
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform var(--trans), border-color var(--trans), box-shadow var(--trans);
+      display: flex;
+      flex-direction: column;
+    }
+    .project-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0,225,255,.35);
+      box-shadow: 0 20px 48px rgba(0,0,0,.4), 0 0 0 1px rgba(0,225,255,.1);
+    }
+
+    .project-thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: var(--bg3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+    .project-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .project-thumb-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: .7rem;
+    }
+
+    .project-body { padding: 1.4rem; flex: 1; display: flex; flex-direction: column; }
+    .project-title {
+      font-family: var(--font-disp);
+      font-size: 1.5rem;
+      margin-bottom: .5rem;
+      color: var(--white);
+    }
+    .project-desc {
+      font-size: .88rem;
+      color: var(--muted);
+      flex: 1;
+      margin-bottom: 1rem;
+    }
+
+    .project-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      margin-bottom: 1.2rem;
+    }
+    .tool-tag {
+      padding: .25rem .65rem;
+      border-radius: 4px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: .65rem;
+      letter-spacing: .08em;
+      color: var(--cyan);
+    }
+
+    .project-link {
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      color: var(--cyan);
+      letter-spacing: .06em;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      transition: gap var(--trans);
+    }
+    .project-link:hover { gap: .7rem; }
+
+    /* ============================================================
+       BUSINESS (PHONE REPAIR)
+    ============================================================ */
+    #business {
+      padding: 7rem 0;
+      background: var(--bg2);
+      position: relative;
+      overflow: hidden;
+    }
+    #business::after {
+      content: '';
+      position: absolute;
+      bottom: -100px; left: -100px;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,225,255,.06) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .business-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+      margin-top: 3.5rem;
+    }
+
+    .service-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .service-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 1.2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: border-color var(--trans);
+    }
+    .service-item:hover { border-color: rgba(0,225,255,.35); }
+    .service-icon {
+      width: 38px; height: 38px; min-width: 38px;
+      border-radius: 8px;
+      background: var(--cyan-dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      color: var(--cyan);
+    }
+    .service-item h4 {
+      font-size: .92rem;
+      font-weight: 500;
+      margin-bottom: .2rem;
+    }
+    .service-item p {
+      font-size: .82rem;
+      color: var(--muted);
+    }
+
+    /* before/after + video placeholders */
+    .media-stack { display: flex; flex-direction: column; gap: 1.2rem; }
+
+    .before-after {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+
+    .media-placeholder {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      aspect-ratio: 4/3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      letter-spacing: .08em;
+      position: relative;
+      overflow: hidden;
+    }
+    .media-placeholder::before {
+      content: attr(data-label);
+      position: absolute;
+      top: .6rem; left: .6rem;
+      font-size: .6rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      background: var(--cyan-dim);
+      padding: .2rem .5rem;
+      border-radius: 4px;
+    }
+    .media-placeholder img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      position: absolute;
+      inset: 0;
+    }
+
+    .video-placeholder {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      aspect-ratio: 16/9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      letter-spacing: .08em;
+      cursor: pointer;
+      transition: border-color var(--trans);
+    }
+    .video-placeholder:hover { border-color: rgba(0,225,255,.4); }
+    .play-btn {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--cyan-dim);
+      border: 2px solid var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--cyan);
+      font-size: 1.3rem;
+      transition: background var(--trans), box-shadow var(--trans);
+    }
+    .video-placeholder:hover .play-btn {
+      background: var(--cyan);
+      color: var(--bg);
+      box-shadow: 0 0 24px var(--cyan-glow);
+    }
+
+    @media (max-width: 860px) {
+      .business-grid { grid-template-columns: 1fr; gap: 3rem; }
+    }
+
+    /* ============================================================
+       REVENUE
+    ============================================================ */
+    #revenue {
+      padding: 7rem 0;
+      background: var(--bg);
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin: 3.5rem 0 2.5rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.8rem 1.5rem;
+      text-align: center;
+      transition: border-color var(--trans), transform var(--trans);
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--cyan);
+      transform: scaleX(0);
+      transition: transform var(--trans);
+      transform-origin: left;
+    }
+    .stat-card:hover::before { transform: scaleX(1); }
+    .stat-card:hover { border-color: rgba(0,225,255,.3); transform: translateY(-4px); }
+
+    .stat-num {
+      font-family: var(--font-disp);
+      font-size: 3rem;
+      color: var(--cyan);
+      line-height: 1;
+      margin-bottom: .4rem;
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      position: relative;
+    }
+    .chart-title {
+      font-family: var(--font-mono);
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .stats-row .stat-card:last-child { grid-column: 1/-1; }
+    }
+
+    /* ============================================================
+       CONTACT
+    ============================================================ */
+    #contact {
+      padding: 7rem 0 6rem;
+      background: var(--bg2);
+      position: relative;
+    }
+
+    .contact-wrap {
+      max-width: 680px;
+      margin: 3rem auto 0;
+      text-align: center;
+    }
+    .contact-wrap p {
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+      font-size: .97rem;
+    }
+
+    .contact-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .contact-card {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      padding: 1rem 1.6rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: border-color var(--trans), transform var(--trans), background var(--trans);
+      font-family: var(--font-mono);
+      font-size: .82rem;
+      letter-spacing: .06em;
+    }
+    .contact-card:hover {
+      border-color: var(--cyan);
+      background: var(--cyan-dim);
+      color: var(--cyan);
+      transform: translateY(-4px);
+    }
+    .contact-card svg { flex-shrink: 0; }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 1.8rem;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      letter-spacing: .1em;
+      color: var(--muted);
+    }
+    footer span { color: var(--cyan); }
+
+    /* ============================================================
+       SECTION DIVIDER
+    ============================================================ */
+    .section-line {
+      width: 60px; height: 3px;
+      background: var(--cyan);
+      border-radius: 2px;
+      margin: .8rem 0 2rem;
+    }
+
+  </style>
 </head>
 <body>
 
-    <h1>Your Name</h1>
-    <p>IT Student | Phone Repair Technician</p>
+  <!-- ================================================================
+       NAV
+  ================================================================ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <!-- ↓ Replace YN with your initials or logo -->
+      <a href="#home" class="nav-logo">YN</a>
 
-    <h2>Projects</h2>
-    <p>Database Project - Coming soon</p>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">IT Projects</a></li>
+        <li><a href="#business">Business</a></li>
+        <li><a href="#revenue">Revenue</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
 
-    <h2>Phone Repair Business</h2>
-    <p>Micro soldering, screen repairs, and more</p>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
 
-    <h2>Links</h2>
-    <a href="https://linkedin.com/in/yourprofile">LinkedIn</a><br>
-    <a href="#">Resume</a>
+
+  <!-- ================================================================
+       HOME / HERO
+  ================================================================ -->
+  <section id="home">
+    <div class="container hero-inner">
+
+      <div class="hero-text">
+        <!-- availability badge -->
+        <div class="hero-tag reveal">
+          <span class="dot"></span>
+          <span class="label" style="color:var(--white);font-size:.7rem;">Available for opportunities</span>
+        </div>
+
+        <!-- ↓ Replace with your name (split on two lines for visual impact) -->
+        <h1 class="hero-name reveal">
+          <span class="line1">Your</span><br>
+          <span class="line2">Name</span>
+        </h1>
+
+        <!-- ↓ Replace subtitle -->
+        <p class="hero-sub reveal">
+          IT Student &nbsp;·&nbsp; Phone Repair Technician &nbsp;·&nbsp; Entrepreneur
+        </p>
+
+        <!-- ↓ Replace tagline -->
+        <p class="hero-tagline reveal">
+          I turn complex problems into clean solutions — from database systems to
+          micro-soldering smartphones back to life.
+        </p>
+
+        <div class="hero-btns reveal">
+          <a href="#projects" class="btn btn-primary">View Projects →</a>
+          <a href="#contact" class="btn btn-ghost">Contact Me</a>
+        </div>
+      </div>
+
+      <!-- decorative stats card — update numbers freely -->
+      <div class="hero-card reveal">
+        <div class="hero-stat">
+          <div class="num">200+</div>
+          <div class="desc">Repairs Done</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <div class="num">3+</div>
+          <div class="desc">IT Projects</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <div class="num">98%</div>
+          <div class="desc">Satisfaction</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ================================================================
+       ABOUT ME
+  ================================================================ -->
+  <section id="about">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">/ 01 — About Me</span>
+        <h2 class="section-title">Who <span>I Am</span></h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="about-grid">
+
+        <!-- Photo column -->
+        <div class="about-img-wrap reveal">
+          <div class="about-img">
+            <!-- ↓ Replace src with your actual photo path -->
+            <!-- <img src="assets/your-photo.jpg" alt="Your Name" /> -->
+            <div class="about-img-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              </svg>
+              <span>Replace with your photo</span>
+            </div>
+          </div>
+
+          <!-- floating badge — update freely -->
+          <div class="about-badge">
+            <div class="badge-icon">🔧</div>
+            <div class="badge-text">
+              <div class="t1">3 YRS</div>
+              <div class="t2">Hands-on XP</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bio column -->
+        <div class="about-content reveal">
+          <span class="label" style="margin-bottom:.5rem;display:block;">My Background</span>
+
+          <!-- ↓ Replace paragraphs with your actual bio -->
+          <p>
+            I'm an IT student passionate about technology, problem-solving, and building systems
+            that actually work. My academic journey has given me a strong foundation in databases,
+            networking, and software development — skills I apply both in the classroom and in the real world.
+          </p>
+          <p>
+            On the hardware side, I run my own phone repair business where I handle everything from
+            cracked screen replacements to advanced <strong style="color:var(--white);">micro-soldering</strong>
+            — repairing tiny components on motherboards that most shops refuse to touch.
+          </p>
+          <p>
+            Whether I'm designing a relational database in MS Access, writing SQL queries, or
+            diagnosing a water-damaged iPhone, I bring the same systematic mindset:
+            <em style="color:var(--cyan);">understand the system, isolate the problem, and fix it right.</em>
+          </p>
+
+          <!-- skill chips — add/remove freely -->
+          <div class="skill-chips">
+            <span class="chip">SQL</span>
+            <span class="chip">MS Access</span>
+            <span class="chip">Python</span>
+            <span class="chip">Networking</span>
+            <span class="chip">Micro-Soldering</span>
+            <span class="chip">Hardware Diagnostics</span>
+            <span class="chip">HTML / CSS</span>
+            <span class="chip">Helpdesk Support</span>
+            <span class="chip">Excel</span>
+            <span class="chip">Windows Server</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================================================================
+       IT PROJECTS
+  ================================================================ -->
+  <section id="projects">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">/ 02 — IT Projects</span>
+        <h2 class="section-title">My <span>Work</span></h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="projects-grid">
+
+        <!-- ── PROJECT CARD 1 ── -->
+        <article class="project-card reveal">
+          <div class="project-thumb">
+            <!-- ↓ Replace src with screenshot -->
+            <!-- <img src="assets/helpdesk-screenshot.png" alt="Helpdesk System" /> -->
+            <div class="project-thumb-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+              </svg>
+              <span>Add screenshot</span>
+            </div>
+          </div>
+          <div class="project-body">
+            <h3 class="project-title">IT Helpdesk System</h3>
+            <p class="project-desc">
+              A full-featured helpdesk ticketing system built in MS Access. Allows IT staff to log,
+              track, and resolve support tickets with priority levels, status tracking, and reporting dashboards.
+            </p>
+            <div class="project-tools">
+              <span class="tool-tag">MS Access</span>
+              <span class="tool-tag">VBA</span>
+              <span class="tool-tag">SQL</span>
+              <span class="tool-tag">Relational DB</span>
+            </div>
+            <!-- ↓ Replace href with your GitHub link -->
+            <a href="https://github.com/yourusername/helpdesk" target="_blank" class="project-link">
+              View on GitHub <span>→</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- ── PROJECT CARD 2 ── -->
+        <article class="project-card reveal">
+          <div class="project-thumb">
+            <!-- ↓ Replace src with screenshot -->
+            <div class="project-thumb-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
+                <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>
+              </svg>
+              <span>Add screenshot</span>
+            </div>
+          </div>
+          <div class="project-body">
+            <h3 class="project-title">Inventory Database</h3>
+            <p class="project-desc">
+              Relational database design for a small retail business. Includes normalized tables,
+              stored queries, forms for data entry, and automated low-stock alerts via macros.
+            </p>
+            <div class="project-tools">
+              <span class="tool-tag">MS Access</span>
+              <span class="tool-tag">SQL</span>
+              <span class="tool-tag">Database Design</span>
+            </div>
+            <a href="https://github.com/yourusername/inventory-db" target="_blank" class="project-link">
+              View on GitHub <span>→</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- ── PROJECT CARD 3 ── -->
+        <article class="project-card reveal">
+          <div class="project-thumb">
+            <!-- ↓ Replace src with screenshot -->
+            <div class="project-thumb-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+              </svg>
+              <span>Add screenshot</span>
+            </div>
+          </div>
+          <div class="project-body">
+            <h3 class="project-title">Network Topology Map</h3>
+            <p class="project-desc">
+              Designed and documented a small-business LAN including IP addressing scheme, VLAN
+              segmentation, and a simulated Cisco Packet Tracer environment for testing.
+            </p>
+            <div class="project-tools">
+              <span class="tool-tag">Packet Tracer</span>
+              <span class="tool-tag">Networking</span>
+              <span class="tool-tag">VLAN</span>
+              <span class="tool-tag">TCP/IP</span>
+            </div>
+            <a href="https://github.com/yourusername/network-map" target="_blank" class="project-link">
+              View on GitHub <span>→</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- ── PROJECT CARD 4 — add more as needed ── -->
+        <article class="project-card reveal">
+          <div class="project-thumb">
+            <div class="project-thumb-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+              </svg>
+              <span>Add screenshot</span>
+            </div>
+          </div>
+          <div class="project-body">
+            <h3 class="project-title">Portfolio Website</h3>
+            <p class="project-desc">
+              This very site — a hand-coded, responsive portfolio built with pure HTML, CSS, and
+              vanilla JavaScript. Deployed on GitHub Pages with no frameworks required.
+            </p>
+            <div class="project-tools">
+              <span class="tool-tag">HTML</span>
+              <span class="tool-tag">CSS</span>
+              <span class="tool-tag">JavaScript</span>
+              <span class="tool-tag">Chart.js</span>
+            </div>
+            <a href="https://github.com/yourusername/portfolio" target="_blank" class="project-link">
+              View on GitHub <span>→</span>
+            </a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================================================================
+       BUSINESS — PHONE REPAIR
+  ================================================================ -->
+  <section id="business">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">/ 03 — Business</span>
+        <h2 class="section-title">Phone <span>Repair</span></h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="business-grid">
+
+        <!-- Left: services description -->
+        <div class="reveal">
+          <!-- ↓ Replace with your actual business description -->
+          <p style="color:var(--muted);margin-bottom:.5rem;font-size:.95rem;">
+            I founded and operate a mobile phone repair service offering fast, affordable, and
+            professional repairs. My specialty is <strong style="color:var(--white);">board-level micro-soldering</strong>
+            — a skill that lets me bring back devices others consider beyond repair.
+          </p>
+
+          <div class="service-list">
+            <div class="service-item">
+              <div class="service-icon">📱</div>
+              <div>
+                <h4>Screen Replacement</h4>
+                <p>OLED & LCD swaps for iPhone, Samsung, and more. Same-day turnaround.</p>
+              </div>
+            </div>
+            <div class="service-item">
+              <div class="service-icon">🔬</div>
+              <div>
+                <h4>Micro-Soldering</h4>
+                <p>Board-level repairs: charging ICs, CPU reballing, component-level diagnostics.</p>
+              </div>
+            </div>
+            <div class="service-item">
+              <div class="service-icon">💧</div>
+              <div>
+                <h4>Water Damage Recovery</h4>
+                <p>Ultrasonic cleaning and component-level assessment to recover data and function.</p>
+              </div>
+            </div>
+            <div class="service-item">
+              <div class="service-icon">🔋</div>
+              <div>
+                <h4>Battery & Diagnostics</h4>
+                <p>Full diagnostic reports, battery health checks, and genuine replacement cells.</p>
+              </div>
+            </div>
+          </div>
+
+          <a href="#contact" class="btn btn-primary">Book a Repair →</a>
+        </div>
+
+        <!-- Right: media placeholders -->
+        <div class="media-stack reveal">
+
+          <!-- before / after images -->
+          <div class="before-after">
+            <div class="media-placeholder" data-label="Before">
+              <!-- ↓ Replace with actual before image -->
+              <!-- <img src="assets/before.jpg" alt="Before repair"> -->
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1"/>
+              </svg>
+              <span>Before repair</span>
+            </div>
+            <div class="media-placeholder" data-label="After">
+              <!-- ↓ Replace with actual after image -->
+              <!-- <img src="assets/after.jpg" alt="After repair"> -->
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1"/>
+                <path d="M9 11l2 2 4-4"/>
+              </svg>
+              <span>After repair</span>
+            </div>
+          </div>
+
+          <!-- video embed or placeholder -->
+          <div class="video-placeholder" onclick="alert('Replace this with a real video embed!')">
+            <div class="play-btn">▶</div>
+            <span>Watch a Repair Demo</span>
+            <!-- ↓ To embed a real video, replace the div above with:
+            <iframe width="100%" height="100%" style="border:none;border-radius:10px;"
+              src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+              allowfullscreen></iframe>
+            -->
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================================================================
+       REVENUE / RESULTS
+  ================================================================ -->
+  <section id="revenue">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">/ 04 — Results</span>
+        <h2 class="section-title">Revenue & <span>Growth</span></h2>
+        <div class="section-line"></div>
+      </div>
+
+      <!-- stats row — update numbers freely -->
+      <div class="stats-row">
+        <div class="stat-card reveal">
+          <div class="stat-num">200+</div>
+          <div class="stat-label">Total Repairs</div>
+        </div>
+        <div class="stat-card reveal">
+          <!-- ↓ Replace with actual or estimated revenue -->
+          <div class="stat-num">$12K+</div>
+          <div class="stat-label">Revenue Generated</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-num">98%</div>
+          <div class="stat-label">Customer Satisfaction</div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="chart-wrap reveal">
+        <div class="chart-title">Monthly Revenue Growth (Sample Data — Replace with Actuals)</div>
+        <canvas id="revenueChart" height="90"></canvas>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ================================================================
+       CONTACT
+  ================================================================ -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-header reveal" style="text-align:center;align-items:center;">
+        <span class="label">/ 05 — Contact</span>
+        <h2 class="section-title">Get In <span>Touch</span></h2>
+        <div class="section-line" style="margin-inline:auto;"></div>
+      </div>
+
+      <div class="contact-wrap reveal">
+        <!-- ↓ Replace with your actual intro message -->
+        <p>
+          I'm open to IT internships, freelance projects, and repair inquiries.
+          Reach out via any of the channels below — I usually respond within 24 hours.
+        </p>
+
+        <div class="contact-links">
+
+          <!-- ↓ Replace href with your LinkedIn URL -->
+          <a href="https://linkedin.com/in/yourusername" target="_blank" class="contact-card">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+            LinkedIn
+          </a>
+
+          <!-- ↓ Replace with your email -->
+          <a href="mailto:your@email.com" class="contact-card">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M2 7l10 7 10-7"/>
+            </svg>
+            your@email.com
+          </a>
+
+          <!-- ↓ Replace href with your GitHub -->
+          <a href="https://github.com/yourusername" target="_blank" class="contact-card">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482
+                0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462
+                -.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832
+                .092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688
+                -.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004
+                1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7
+                1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338
+                -.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12c0-5.523-4.477-10-10-10z"/>
+            </svg>
+            GitHub
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================================================================
+       FOOTER
+  ================================================================ -->
+  <footer>
+    <!-- ↓ Replace name -->
+    Built by <span>Your Name</span> &nbsp;·&nbsp; <span id="year"></span> &nbsp;·&nbsp;
+    Deployed on GitHub Pages
+  </footer>
+
+
+  <!-- ================================================================
+       JAVASCRIPT
+  ================================================================ -->
+  <script>
+    /* ── Current year in footer ── */
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* ── Mobile nav toggle ── */
+    const toggle = document.getElementById('navToggle');
+    const links  = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => links.classList.toggle('open'));
+    links.querySelectorAll('a').forEach(a =>
+      a.addEventListener('click', () => links.classList.remove('open'))
+    );
+
+    /* ── Scroll reveal (IntersectionObserver) ── */
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          // stagger siblings in the same parent
+          const siblings = [...e.target.parentElement.querySelectorAll('.reveal')];
+          const idx = siblings.indexOf(e.target);
+          e.target.style.transitionDelay = `${idx * 0.08}s`;
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => io.observe(el));
+
+    /* ── Chart.js revenue chart ── */
+    // ↓ Replace labels and data with your actual figures
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+
+    const labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const data   = [320, 480, 610, 750, 920, 1050, 1200, 1380, 1520, 1750, 1900, 2100];
+
+    // Gradient fill
+    const grad = ctx.createLinearGradient(0, 0, 0, 320);
+    grad.addColorStop(0,   'rgba(0,225,255,0.25)');
+    grad.addColorStop(1,   'rgba(0,225,255,0)');
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Monthly Revenue ($)',
+          data,
+          borderColor: '#00e1ff',
+          borderWidth: 2.5,
+          backgroundColor: grad,
+          pointBackgroundColor: '#00e1ff',
+          pointRadius: 4,
+          pointHoverRadius: 7,
+          tension: 0.45,
+          fill: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#181828',
+            borderColor: 'rgba(0,225,255,0.3)',
+            borderWidth: 1,
+            titleColor: '#00e1ff',
+            bodyColor: '#f0f4ff',
+            padding: 12,
+            callbacks: {
+              label: ctx => ` $${ctx.parsed.y.toLocaleString()}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(0,225,255,0.05)' },
+            ticks: {
+              color: '#7e84a3',
+              font: { family: "'DM Mono', monospace", size: 11 }
+            }
+          },
+          y: {
+            grid: { color: 'rgba(0,225,255,0.05)' },
+            ticks: {
+              color: '#7e84a3',
+              font: { family: "'DM Mono', monospace", size: 11 },
+              callback: v => '$' + v.toLocaleString()
+            }
+          }
+        }
+      }
+    });
+  </script>
 
 </body>
 </html>
